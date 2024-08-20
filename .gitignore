@@ -1,0 +1,8 @@
+# Ignore Firebase credentials
+src/whatsapp-glimsol-firebase-adminsdk-wwg1n-6c37910437.json
+
+# Ignore environment variables file
+.env
+
+# Ignore node_modules
+node_modules/

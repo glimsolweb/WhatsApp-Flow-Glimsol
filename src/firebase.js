@@ -1,5 +1,8 @@
 import admin from 'firebase-admin';
-import serviceAccount from './whatsapp-glimsol-firebase-adminsdk-wwg1n-6c37910437.json' assert { type: 'json' };
+import dotenv from 'dotenv';
+
+dotenv.config();
+const serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
