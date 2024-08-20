@@ -46,7 +46,7 @@ const SCREEN_RESPONSES = {
 
 
 // Convert timestamp to a moment object in the 'Asia/Manila' timezone
-import pool from './db.js';
+import db from './firebase.js';
 import moment from 'moment-timezone';
 const convertTimestampToDate = (timestamp) => {
   const date = moment(parseInt(timestamp, 10)).tz('Asia/Manila');
@@ -94,20 +94,26 @@ export const getNextScreen = async (decryptedBody) => {
         console.log('Received data on APPOINTMENT screen:', data.trigger);
 
         if(data.trigger === 'btn_submitted' && data.orderType && data.screen_0_TextInput_1 && data.screen_0_DatePicker_2 && data.screen_0_TextArea_3){
-          let order_type = data.orderType;
-          let customer_name = data.screen_0_TextInput_1;
+          let orderType = data.orderType;
+          let customerName = data.screen_0_TextInput_1;
           let date = data.screen_0_DatePicker_2;
-          let formatted_date = convertTimestampToDate(data.screen_0_DatePicker_2);
+          let formattedDate = convertTimestampToDate(data.screen_0_DatePicker_2);
           let details = data.screen_0_TextArea_3;
-          // Insert data into the database
+
+          // Insert data into Realtime Database
           try {
-            const [rows] = await pool.query(
-                'INSERT INTO flow_messages (order_type, customer_name, date, formatted_date, details) VALUES (?, ?, ?, ?, ?)',
-                [order_type, customer_name, date, formatted_date, details]
-            );
-            console.log('Data Saved to Databased!');
+            const ref = db.ref('flow_messages');  // Reference to the 'flow_messages' node
+            const newMessageRef = ref.push();  // Create a new child reference
+            await newMessageRef.set({
+              order_type: orderType,
+              customer_name: customerName,
+              date: date,
+              formatted_date: formattedDate,
+              details: details,
+            });
+            console.log('Data Saved to Realtime Database!');
           } catch (error) {
-              console.error('Error inserting data:', error);
+            console.error('Error inserting data:', error);
           }
 
           return {
@@ -119,7 +125,7 @@ export const getNextScreen = async (decryptedBody) => {
               //   }
               // },  
               data_submitted: data,
-              date: formatted_date
+              date: formattedDate
             },
           };
         }else{
